@@ -1,18 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAM_DICIO 10
-#define dicio "dicioTeste.txt"
+#define TAM_DICIO 100000
+#define TAM_MAX 46
+#define dicio "dicioPadrao"
+
+unsigned int RSHash(const char* str, unsigned int length)
+{
+   unsigned int b    = 378551;
+   unsigned int a    = 63689;
+   unsigned int hash = 0;
+   unsigned int i    = 0;
+
+   for (i = 0; i < length; ++str, ++i)
+   {
+      hash = hash * a + (*str);
+      a    = a * b;
+   }
+
+   return hash;
+}
 
 int contaPalavrasDic(void){
   FILE *fd;
-  char temp[45];
+  char temp[TAM_MAX];
   int i;
 
   i = 0;
   fd = fopen(dicio, "r");
   if(fd != NULL){
-    while(fgets(temp, 45, fd)){
+    while(fgets(temp, TAM_MAX, fd)){
       i++;
     }
     fclose(fd);
@@ -27,15 +44,14 @@ int main(void){
   int i;
   FILE *fd;
   const char *dicionario[TAM_DICIO];
-  char temp[46];
+  char temp[TAM_MAX];
 
-  i = 0;
   fd = fopen(dicio, "r");
   if(fd != NULL){
-    while(fgets(temp, 46, fd)){
+    while(fgets(temp, TAM_MAX, fd)){
+      i = RSHash(temp, TAM_MAX)/103811;
       dicionario[i] = temp;
       printf("%i %s", i, dicionario[i]);
-      i++;
     }
   }
   return 0;

@@ -12,9 +12,13 @@
 
 /* Tamanho maximo de uma palavra do dicionario */
 #define TAM_MAX 45
+/* Tamanho do vetor dicionario */
+#define TAM_DICIO 150000
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
+/* Varável global para dicionario */
+const char *dicionario[TAM_DICIO];
 /* retornos desse programa */
 #define SUCESSO                 0
 #define NUM_ARGS_INCORRETO      1
@@ -31,27 +35,67 @@ typedef struct palavra{
   struct palavra *ant;
 }palavra;
 
+/* Hash para ser usado no dicionário */
+unsigned int BKDRHash(const char* str, unsigned int length)
+{
+   unsigned int seed = 13131313; /* 31 131 1313 13131 131313 etc.. */
+   unsigned int hash = 0;
+   unsigned int i    = 0;
+
+   for (i = 0; i < length; ++str, ++i)
+   {
+      hash = (hash * seed) + (*str);
+   }
+
+   return hash;
+}
+/* Fim-hash */
+
 /* Retorna true se a palavra estah no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
-  
-    return false;
+  int i;
+  i = BKDRHash(palavra, TAM_MAX)/250037;
+  if(dicionario[i] != NULL){
+    return true;
+  }
+  return false;
 } /* fim-conferePalavra */
 
 /* Carrega dicionario na memoria. Retorna true se sucesso; senao retorna false. */
-bool carregaDicionario(const char *dicionario) {
+bool carregaDicionario() {
+  int i;
+  FILE *fd;
+  char temp[TAM_MAX];
 
-    /* construa essa funcao */
-
-    return false;
+  fd = fopen(NOME_DICIONARIO, "r");
+  if(fd != NULL){
+    while(fgets(temp, TAM_MAX, fd)){
+      i = BKDRHash(temp, TAM_MAX)/250037;
+      dicionario[i] = temp;
+      printf("%i %s", i, dicionario[i]);
+    }
+    return true;
+  }
+  return false;
 } /* fim-carregaDicionario */
 
 
 /* Retorna qtde palavras do dicionario, se carregado; senao carregado retorna zero */
 unsigned int contaPalavrasDic(void) {
+  FILE *fd;
+  char temp[TAM_MAX];
+  int i;
 
-    /* construa essa funcao */
-
-    return 0;
+  i = 0;
+  fd = fopen(NOME_DICIONARIO, "r");
+  if(fd != NULL){
+    while(fgets(temp, TAM_MAX, fd)){
+      i++;
+    }
+    fclose(fd);
+    return i;
+  }
+  return 0;
 } /* fim-contaPalavrasDic */
 
 
@@ -80,7 +124,6 @@ int main(int argc, char *argv[]) {
     struct rusage tempo_inicial, tempo_final; /* structs para dados de tempo do processo */
     double tempo_carga = 0.0, tempo_check = 0.0, tempo_calc_tamanho_dic = 0.0, tempo_limpeza_memoria = 0.0;
     /* determina qual dicionario usar; o default eh usar o arquivo dicioPadrao */
-    char *dicionario = (argc == 3) ? argv[1] : NOME_DICIONARIO;
     int  indice, totPalErradas, totPalavras, c;
     char palavra[TAM_MAX+1];
     bool palavraErrada, descarga, carga;

@@ -6,3 +6,11 @@ yellow
 white
 black
 orange
+teal
+violet
+crimson
+turquoise
+blood
+aquamarine
+beige
+chocolate
