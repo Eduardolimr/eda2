@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <stdbool.h>
@@ -15,7 +16,7 @@
 /* Tamanho do vetor dicionario */
 #define TAM_DICIO 150000
 /* dicionario default */
-#define NOME_DICIONARIO "dicioPadrao"
+#define NOME_DICIONARIO "dicioTeste.txt"
 
 /* Varável global para dicionario */
 const char *dicionario[TAM_DICIO];
@@ -36,25 +37,25 @@ typedef struct palavra{
 }palavra;
 
 /* Hash para ser usado no dicionário */
-unsigned int BKDRHash(const char* str, unsigned int length)
+unsigned int SDBMHash(const char* str, unsigned int length)
 {
-   unsigned int seed = 13131313; /* 31 131 1313 13131 131313 etc.. */
    unsigned int hash = 0;
    unsigned int i    = 0;
 
    for (i = 0; i < length; ++str, ++i)
    {
-      hash = (hash * seed) + (*str);
+      hash = (*str) + (hash << 6) + (hash << 16) - hash;
    }
 
    return hash;
 }
 /* Fim-hash */
 
-/* Retorna true se a palavra estah no dicionario. Do contrario, retorna false */
+/* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
   int i;
-  i = BKDRHash(palavra, TAM_MAX)/250037;
+  i = SDBMHash(palavra, TAM_MAX)/250037;
+  printf("%d %s", i, palavra);
   if(dicionario[i] != NULL){
     return true;
   }
@@ -65,15 +66,18 @@ bool conferePalavra(const char *palavra) {
 bool carregaDicionario() {
   int i;
   FILE *fd;
-  char temp[TAM_MAX];
+  char *temp;
 
+  temp = (char *) malloc (sizeof(char)*TAM_MAX);
   fd = fopen(NOME_DICIONARIO, "r");
   if(fd != NULL){
-    while(fgets(temp, TAM_MAX, fd)){
-      i = BKDRHash(temp, TAM_MAX)/250037;
+    while(fscanf(fd, "%s", temp)!=EOF){
+      i = SDBMHash(temp, TAM_MAX)/250037;
       dicionario[i] = temp;
       printf("%i %s", i, dicionario[i]);
     }
+    free(temp);
+    fclose(fd);
     return true;
   }
   return false;
@@ -125,7 +129,7 @@ int main(int argc, char *argv[]) {
     double tempo_carga = 0.0, tempo_check = 0.0, tempo_calc_tamanho_dic = 0.0, tempo_limpeza_memoria = 0.0;
     /* determina qual dicionario usar; o default eh usar o arquivo dicioPadrao */
     int  indice, totPalErradas, totPalavras, c;
-    char palavra[TAM_MAX+1];
+    char palavra[TAM_MAX];
     bool palavraErrada, descarga, carga;
     unsigned int qtdePalavrasDic;
     char *arqTexto;
@@ -198,7 +202,6 @@ int main(int argc, char *argv[]) {
             tempo_check += calcula_tempo(&tempo_inicial, &tempo_final);
             /* imprime palavra se nao encontrada no dicionario */
             if (palavraErrada) {
-                printf("%s\n", palavra);
                 totPalErradas++;
             } /* fim-if */
             /* faz "reset" no indice para recuperar nova palavra no arquivo-texto*/
