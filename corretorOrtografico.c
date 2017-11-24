@@ -48,7 +48,7 @@ unsigned int SDBMHash(const char* str, unsigned int length)
       hash = (*str) + (hash << 6) + (hash << 16) - hash;
    }
 
-   return hash%160739;
+   return hash%51479;
 }
 /* Fim-hash */
 
