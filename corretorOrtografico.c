@@ -14,7 +14,7 @@
 /* Tamanho maximo de uma palavra*/
 #define TAM_MAX 45
 /* Tamanho do vetor dicionario */
-#define TAM_DICIO 250000
+#define TAM_DICIO 400000
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
@@ -38,18 +38,20 @@ typedef struct palavra{
 }palavra;
 
 /* Hash para ser usado no dicionário */
-unsigned int SDBMHash(const char* str, unsigned int length)
-{
-   unsigned int hash = 0;
-   unsigned int i    = 0;
+unsigned int string_nocase_hash(void *string){
+	unsigned int result = 5381;
+	unsigned char *p;
 
-   for (i = 0; i < length; ++str, ++i)
-   {
-      hash = (*str) + (hash << 6) + (hash << 16) - hash;
-   }
+	p = (unsigned char *) string;
 
-   return hash%51479;
+	while (*p != '\0') {
+		result = (result << 5) + result + (unsigned int) tolower(*p);
+		++p;
+	}
+
+	return result%399989;
 }
+
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
@@ -64,7 +66,7 @@ bool conferePalavra(const char *palavra) {
     temp[i] = tolower(palavra[i]);
   }
   temp[i] = '\0';
-  i = SDBMHash(temp, TAM_MAX);
+  i = string_nocase_hash(temp);
   free(temp);
   if(dicionario[i] != NULL){
     return true;
@@ -84,7 +86,7 @@ bool carregaDicionario() {
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
-      i = SDBMHash(temp, TAM_MAX);
+      i = string_nocase_hash(temp);
       dicionario[i] = temp;
     }
     free(temp);
