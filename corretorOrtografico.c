@@ -59,7 +59,6 @@ bool conferePalavra(const char *palavra) {
 
 
   /* string temporaria para conversao a lowercase */
-  /*
   temp = (char *) malloc (sizeof(char)*TAM_MAX);
   for(i = 0; i < strlen(palavra); i++){
     temp[i] = tolower(palavra[i]);
@@ -67,8 +66,6 @@ bool conferePalavra(const char *palavra) {
   temp[i] = '\0';
   i = SDBMHash(temp, TAM_MAX);
   free(temp);
-  */
-  i = SDBMHash(palavra, TAM_MAX);
   if(dicionario[i] != NULL){
     return true;
   }
