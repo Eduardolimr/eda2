@@ -14,7 +14,7 @@
 /* Tamanho maximo de uma palavra*/
 #define TAM_MAX 45
 /* Tamanho do vetor dicionario */
-#define TAM_DICIO 400000
+#define TAM_DICIO 1000000
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
@@ -49,7 +49,7 @@ unsigned int string_nocase_hash(void *string){
 		++p;
 	}
 
-	return result%399989;
+	return result%1000003;
 }
 
 /* Fim-hash */
