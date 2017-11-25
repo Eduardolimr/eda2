@@ -8,8 +8,13 @@ typedef struct node{
   struct node* right;
 }Node;
 
-char* compare(char* l, char* r) {
-    return strcmp(l, r);
+int compare(char *str1, char *str2){
+  while ( *str1 != '\0' && *str1 == *str2 )
+  {
+   ++str1;
+   ++str2;
+ }
+return (*str1 - *str2);
 }
 
 Node* insert(Node* root, char *nome){
@@ -21,19 +26,13 @@ Node* insert(Node* root, char *nome){
     novo->left = NULL;
     novo->right = NULL;
     root = novo;
-    return novo;
+    return root;
   }
   else{
-    while(nome[i]==root->palavra[i]){
-      printf("f");
-      i++;
-    }
-    if((nome[i]) < root->palavra[i]){
-      printf("g");
+    if(compare(nome,root->palavra)>0){
       root->left = insert(root->left, nome);
     }
-    else{
-      printf("h");
+    else if(compare(nome,root->palavra)<0){
       root->right = insert(root->right, nome);
     }
   }
@@ -43,10 +42,10 @@ Node *imprimeArvore(Node *raiz){
   if(raiz->right != NULL){
     raiz->right = imprimeArvore(raiz->right);
   }
+  printf("%s ", raiz->palavra);
   if(raiz->left != NULL){
     raiz->left = imprimeArvore(raiz->left);
   }
-  printf("%s ", raiz->palavra);
   return raiz;
 }
 
@@ -72,7 +71,7 @@ int main(){
   root = insert(root,"bb");
   root = insert(root,"ca");
   root = insert(root,"bc");
-  printf("%s\n", compare("ba","bb"));
+
   root = imprimeArvore(root);
   printf("\n");
   destroiArvore(root);
