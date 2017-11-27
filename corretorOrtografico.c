@@ -38,19 +38,18 @@ typedef struct palavra{
 }palavra;
 
 /* Hash para ser usado no dicionário */
-unsigned int DJBHash(const char* str, unsigned int length)
+unsigned int JSHash(const char* str, unsigned int length)
 {
-   unsigned int hash = 5381;
+   unsigned int hash = 1315423911;
    unsigned int i    = 0;
 
    for (i = 0; i < length; ++str, ++i)
    {
-      hash = ((hash << 5) + hash) + (*str);
+      hash ^= ((hash << 5) + (*str) + (hash >> 2));
    }
 
-   return hash%25153;
+   return hash%1000003;
 }
-
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
@@ -60,13 +59,7 @@ bool conferePalavra(const char *palavra) {
 
 
   /* string temporaria para conversao a lowercase */
-  temp = (char *) malloc (sizeof(char)*TAM_MAX);
-  for(i = 0; i < strlen(palavra); i++){
-    temp[i] = tolower(palavra[i]);
-  }
-  temp[i] = '\0';
-  i = DJBHash(temp, TAM_MAX);
-  free(temp);
+  i = JSHash(palavra, TAM_MAX);
   if(dicionario[i] != NULL){
     return true;
   }
@@ -85,7 +78,7 @@ bool carregaDicionario() {
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
-      i = DJBHash(temp, TAM_MAX);
+      i = JSHash(temp, TAM_MAX);
       dicionario[i] = temp;
     }
     free(temp);

@@ -60,16 +60,18 @@ bool conferePalavra(const char *palavra) {
   char *temp;
 
 
-  /* string temporaria para conversao a lowercase */
+  /* string temporaria para comparacao */
   temp = (char *) malloc (sizeof(char)*TAM_MAX);
   for(i = 0; i < strlen(palavra); i++){
-    temp[i] = tolower(palavra[i]);
+    temp[i] = palavra[i];
   }
   temp[i] = '\0';
   i = string_nocase_hash(temp);
   free(temp);
   if(dicionario[i] != NULL){
-    return true;
+    if(!strcmp(palavra, dicionario[i])){
+      return true;
+    }
   }
   printf("ERRADA! %d %s\n", i, palavra);
   return false;
