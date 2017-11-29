@@ -27,15 +27,18 @@ int max(int a, int b);
 // A utility function to get height of the tree
 int height(struct Node *N)
 {
-    if (N == NULL)
+    if (N == NULL){
         return 0;
+    }
     return N->height;
 }
 
 // A utility function to get maximum of two integers
-int max(int a, int b)
-{
-    return (a > b)? a : b;
+int max(int a, int b){
+  if(a>b){
+    return a;
+  }
+    return b;
 }
 
 /* Helper function that allocates a new node with the given key and
