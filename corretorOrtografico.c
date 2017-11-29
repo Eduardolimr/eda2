@@ -14,7 +14,9 @@
 /* Tamanho maximo de uma palavra*/
 #define TAM_MAX 45
 /* Tamanho do vetor dicionario */
-#define TAM_DICIO 1000000
+#define TAM_DICIO 1000003
+/* Máximo de colisões */
+#define MAX_COLIS 3
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
@@ -48,15 +50,16 @@ unsigned int JSHash(const char* str, unsigned int length)
       hash ^= ((hash << 5) + (*str) + (hash >> 2));
    }
 
-   return hash%1000003;
+   return hash%TAM_DICIO;
 }
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
-  int i;
+  int i, cont;
   char *temp;
 
+  cont = 0;
   temp = (char *) malloc (sizeof(char)*TAM_MAX);
   for(i = 0; i < strlen(palavra); i++){
     temp[i] = palavra[i];
@@ -64,25 +67,22 @@ bool conferePalavra(const char *palavra) {
   temp[i] = '\0';
 
   i = JSHash(palavra, TAM_MAX);
-  if(dicionario[i] == NULL){
-    return false;
-  }
-  else if(strcmp(dicionario[i], temp)){
-    i++;
-    do{
-      if(i < TAM_DICIO && strcmp(dicionario[i], temp)){
-        i++;
-      }
-      else if(i >= TAM_DICIO){
-        i = 0;
-      }
-      else{
-        return true;
-      }
-    }while(dicionario[i] != NULL);
-  }
-  else{
-    return true;
+  if(dicionario[i] != NULL){
+    if(!strcmp(dicionario[i], temp)){
+      free(temp);
+      return true;
+    }
+    else{
+      i++;
+      do{
+        if(i < TAM_DICIO && strcmp(dicionario[i], temp)){
+          i++;
+        }
+        else if(i >= TAM_DICIO){
+
+        }
+      }while(cont < MAX_COLIS);
+    }
   }
   free(temp);
   return false;
