@@ -69,9 +69,7 @@ bool conferePalavra(const char *palavra) {
   i = string_nocase_hash(temp);
   free(temp);
   if(dicionario[i] != NULL){
-    if(!strcmp(palavra, dicionario[i])){
-      return true;
-    }
+    return true;
   }
   printf("ERRADA! %d %s\n", i, palavra);
   return false;
