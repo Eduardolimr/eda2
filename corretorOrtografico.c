@@ -14,7 +14,9 @@
 /* Tamanho maximo de uma palavra*/
 #define TAM_MAX 45
 /* Tamanho do vetor dicionario */
-#define TAM_DICIO 1000000
+#define TAM_DICIO 1000003
+/* Máximo de colisões */
+#define MAX_COLIS 100
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
@@ -48,22 +50,48 @@ unsigned int JSHash(const char* str, unsigned int length)
       hash ^= ((hash << 5) + (*str) + (hash >> 2));
    }
 
-   return hash%1000003;
+   return hash%TAM_DICIO;
 }
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
-  int i;
+  int i, cont;
   char *temp;
 
+  cont = 0;
+  temp = (char *) malloc (sizeof(char)*TAM_MAX);
+  for(i = 0; i < strlen(palavra); i++){
+    temp[i] = palavra[i];
+  }
+  temp[i] = '\0';
 
-  /* string temporaria para conversao a lowercase */
   i = JSHash(palavra, TAM_MAX);
   if(dicionario[i] != NULL){
-    return true;
+    if(!strcmp(dicionario[i], temp)){
+      free(temp);
+      return true;
+    }
+    else{
+      i++;
+      cont++;
+      do{
+        if(i < TAM_DICIO){
+          if(strcmp(dicionario[i], temp)){
+              i++;
+              cont++;
+          }
+          else{
+            return true;
+          }
+        }
+        else{
+          i = 0;
+        }
+      }while(cont < MAX_COLIS);
+    }
   }
-  printf("ERRADA! %d %s\n", i, palavra);
+  free(temp);
   return false;
 } /* fim-conferePalavra */
 
@@ -79,7 +107,23 @@ bool carregaDicionario() {
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
-      dicionario[i] = temp;
+      if(dicionario[i] != NULL){
+        i++;
+        do{
+          if(i < TAM_DICIO && dicionario[i] != NULL){
+            i++;
+          }
+          else if(i >= TAM_DICIO){
+            i = 0;
+          }
+          else{
+            dicionario[i] = temp;
+          }
+        }while(dicionario[i] != NULL);
+      }
+      else{
+        dicionario[i] = temp;
+      }
     }
     free(temp);
     fclose(fd);
