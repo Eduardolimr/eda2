@@ -16,7 +16,7 @@
 /* Tamanho do vetor dicionario */
 #define TAM_DICIO 1000003
 /* Máximo de colisões */
-#define MAX_COLIS 3
+#define MAX_COLIS 100
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
@@ -74,12 +74,19 @@ bool conferePalavra(const char *palavra) {
     }
     else{
       i++;
+      cont++;
       do{
-        if(i < TAM_DICIO && strcmp(dicionario[i], temp)){
-          i++;
+        if(i < TAM_DICIO){
+          if(strcmp(dicionario[i], temp)){
+              i++;
+              cont++;
+          }
+          else{
+            return true;
+          }
         }
-        else if(i >= TAM_DICIO){
-
+        else{
+          i = 0;
         }
       }while(cont < MAX_COLIS);
     }
