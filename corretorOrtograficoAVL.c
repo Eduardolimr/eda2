@@ -38,6 +38,7 @@ struct Node{
 };
 
 struct Node* raiz;
+int NumDicio;
 
 int compare(char *str1, char *str2){
   while ( *str1 != '\0' && *str1 == *str2 )
@@ -169,30 +170,32 @@ struct Node* insert(struct Node* node, char* palavra)
     return node;
 }
 
-bool search(struct Node* root, char* palavra){
-    if(root != NULL){
-      if (compare(palavra, root->nome) < 0){
-        search(root->left, palavra);
+bool check(struct Node* root, char* palavra){
+    if(root!=NULL){
+      if(compare(palavra, root->nome)<0){
+        check(root->left, palavra);
       }
-      else if(compare(palavra, root->nome) > 0){
-        search(root->right, palavra);
+      else if(compare(palavra, root->nome)>0){
+        check(root->right, palavra);
       }
-      else if (compare(palavra, root->nome) == 0){
+      else if(compare(palavra, root->nome)==0){
         return true;
       }
     }
-    return false;
 }
 
 /* Retorna true se a palavra estah no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
-    char* temp = strdup(palavra);
-    return search(raiz,temp);
+    char * temp = strdup(palavra);
+    if(check(raiz,temp) == true){
+      return true;
+    }
+    return false;
 } /* fim-conferePalavra */
 
 /* Carrega dicionario na memoria. Retorna true se sucesso; senao retorna false. */
 bool carregaDicionario(const char *dicionario) {
-  int i;
+  int i,j=0;
   FILE *fd;
   char *temp;
 
@@ -210,19 +213,27 @@ bool carregaDicionario(const char *dicionario) {
   return false;
 } /* fim-carregaDicionario */
 
-int inOrder(struct Node *root){
-  int i = 0;
+void InOrderz(struct Node *root)
+{
     if(root != NULL){
+        InOrderz(root->left);
+          printf("%s ", root->nome);
+        InOrderz(root->right);
+    }
+}
+
+int inOrder(struct Node *root){
+    if(root != NULL){
+        NumDicio++;
         inOrder(root->left);
-        i++;
         inOrder(root->right);
     }
-    return i;
+    return NumDicio;
 }
 
 /* Retorna qtde palavras do dicionario, se carregado; senao carregado retorna zero */
 unsigned int contaPalavrasDic(void) {
-  return inOrder(raiz);
+    return inOrder(raiz)-1;
 } /* fim-contaPalavrasDic */
 
 struct Node *destroiArvore(struct Node *raiz){
@@ -232,7 +243,6 @@ struct Node *destroiArvore(struct Node *raiz){
   if(raiz->left != NULL){
     raiz->left = destroiArvore(raiz->left);
   }
-  printf("Destruindo...\n");
   free(raiz);
   return NULL;
 }
@@ -271,13 +281,13 @@ int main(int argc, char *argv[]) {
     char *arqTexto;
     FILE *fd;
     raiz = NULL;
+    NumDicio = 0;
     /* Confere se o numero de argumentos de chamada estah correto */
     if (argc != 2 && argc != 3) {
         printf("Uso: %s [nomeArquivoDicionario] nomeArquivoTexto\n", argv[0]);
         return NUM_ARGS_INCORRETO;
     } /* fim-if */
-
-    /* carrega o dicionario na memoria, c/ anotacao de tempos inicial e final */
+/* carrega o dicionario na memoria, c/ anotacao de tempos inicial e final */
     getrusage(RUSAGE_SELF, &tempo_inicial);
        carga = carregaDicionario(dicionario);
     getrusage(RUSAGE_SELF, &tempo_final);
@@ -310,6 +320,7 @@ int main(int argc, char *argv[]) {
     for (c = fgetc(fd); c != EOF; c = fgetc(fd)) {
         /* permite apenas palavras c/ caracteres alfabeticos e apostrofes */
         if (isalpha(c) || (c == '\'' && indice > 0)) {
+            c = tolower(c);
             /* recupera um caracter do arquivo e coloca no vetor palavra */
             palavra[indice] = c;
             indice++;
@@ -391,6 +402,5 @@ int main(int argc, char *argv[]) {
     printf("T E M P O   T O T A L                   : %.2f\n\n",
      tempo_carga + tempo_check + tempo_calc_tamanho_dic + tempo_limpeza_memoria);
     printf("------------------------------------------------------\n");
-
    return SUCESSO;
 } /* fim-main */
