@@ -54,9 +54,8 @@ unsigned int JSHash(const char* str, unsigned int length)
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
-  int i, aux;
+  int i;
   char *temp;
-
 
   temp = (char *) malloc (sizeof(char)*TAM_MAX);
   for(i = 0; i < strlen(palavra); i++){
@@ -65,25 +64,26 @@ bool conferePalavra(const char *palavra) {
   temp[i] = '\0';
 
   i = JSHash(palavra, TAM_MAX);
-  if(!(strcmp(temp, dicionario[i]))){
-    return true;
+  if(dicionario[i] == NULL){
+    return false;
+  }
+  else if(strcmp(dicionario[i], temp)){
+    i++;
+    do{
+      if(i < TAM_DICIO && strcmp(dicionario[i], temp)){
+        i++;
+      }
+      else if(i >= TAM_DICIO){
+        i = 0;
+      }
+      else{
+        return true;
+      }
+    }while(dicionario[i] != NULL);
   }
   else{
-    aux = i;
-    do{
-      aux++;
-      if(aux < TAM_MAX && dicionario[aux] != NULL){
-        if(!strcmp(temp, dicionario[aux])){
-          free(temp);
-          return true;
-        }
-      }
-      else if(aux >= TAM_MAX){
-        aux = 0;
-      }
-    }while(dicionario[aux] != NULL);
+    return true;
   }
-  printf("ERRADA! %d %s\n", i, palavra);
   free(temp);
   return false;
 } /* fim-conferePalavra */
@@ -101,20 +101,22 @@ bool carregaDicionario() {
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
       if(dicionario[i] != NULL){
+        i++;
         do{
-          i++;
-          if(i < TAM_MAX && dicionario[i] == NULL){
-            dicionario[i] = temp;
+          if(i < TAM_DICIO && dicionario[i] != NULL){
+            i++;
           }
-          else if(i >= TAM_MAX){
+          else if(i >= TAM_DICIO){
             i = 0;
           }
-        }while(dicionario[i] == NULL);
+          else{
+            dicionario[i] = temp;
+          }
+        }while(dicionario[i] != NULL);
       }
       else{
         dicionario[i] = temp;
       }
-      printf("%d %s\n", i, temp);
     }
     free(temp);
     fclose(fd);
