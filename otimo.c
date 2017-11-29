@@ -38,18 +38,20 @@ typedef struct palavra{
 }palavra;
 
 /* Hash para ser usado no dicionário */
-unsigned int JSHash(const char* str, unsigned int length)
-{
-   unsigned int hash = 1315423911;
-   unsigned int i    = 0;
+unsigned int string_nocase_hash(void *string){
+	unsigned int result = 5381;
+	unsigned char *p;
 
-   for (i = 0; i < length; ++str, ++i)
-   {
-      hash ^= ((hash << 5) + (*str) + (hash >> 2));
-   }
+	p = (unsigned char *) string;
 
-   return hash%1000003;
+	while (*p != '\0') {
+		result = (result << 5) + result + (unsigned int) (*p);
+		++p;
+	}
+
+	return result%1000003;
 }
+
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
@@ -58,10 +60,18 @@ bool conferePalavra(const char *palavra) {
   char *temp;
 
 
-  /* string temporaria para conversao a lowercase */
-  i = JSHash(palavra, TAM_MAX);
+  /* string temporaria para comparacao */
+  temp = (char *) malloc (sizeof(char)*TAM_MAX);
+  for(i = 0; i < strlen(palavra); i++){
+    temp[i] = palavra[i];
+  }
+  temp[i] = '\0';
+  i = string_nocase_hash(temp);
+  free(temp);
   if(dicionario[i] != NULL){
-    return true;
+    if(!strcmp(palavra, dicionario[i])){
+      return true;
+    }
   }
   printf("ERRADA! %d %s\n", i, palavra);
   return false;
@@ -78,7 +88,7 @@ bool carregaDicionario() {
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
-      i = JSHash(temp, TAM_MAX);
+      i = string_nocase_hash(temp);
       dicionario[i] = temp;
     }
     free(temp);
