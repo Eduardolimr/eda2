@@ -19,7 +19,7 @@
 #define NOME_DICIONARIO "dicioPadrao"
 
 /* Varável global para dicionario */
-const char dicionario[TAM_DICIO][TAM_MAX];
+const char *dicionario[TAM_DICIO];
 
 /* retornos desse programa */
 #define SUCESSO                 0
@@ -63,12 +63,9 @@ bool conferePalavra(const char *palavra) {
   /* string temporaria para comparacao */
   strcpy(temp, palavra);
   i = string_nocase_hash(temp);
-  printf("%s\n", dicionario[i]);
-  getchar();
-  if(!strcmp(temp, dicionario[i])){
+  if(dicionario[i] != NULL){
     return true;
   }
-  printf("ERRADA! %d %s\n", i, palavra);
   return false;
 } /* fim-conferePalavra */
 

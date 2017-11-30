@@ -107,15 +107,23 @@ bool carregaDicionario() {
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
-      while(dicionario[i] != NULL) {
-     //go to next cell
-     ++i;
-
-     //wrap around the table
-        i %= TAM_DICIO;
+      if(dicionario[i] != NULL){
+        i++;
+        do{
+          if(i < TAM_DICIO && dicionario[i] != NULL){
+            i++;
+          }
+          else if(i >= TAM_DICIO){
+            i = 0;
+          }
+          else{
+            dicionario[i] = temp;
+          }
+        }while(dicionario[i] != NULL);
       }
-      dicionario[i] = temp;
-      printf("%s %d\n",dicionario[i], i);
+      else{
+        dicionario[i] = temp;
+      }
     }
     free(temp);
     fclose(fd);
@@ -123,7 +131,6 @@ bool carregaDicionario() {
   }
   return false;
 } /* fim-carregaDicionario */
-
 
 
 /* Retorna qtde palavras do dicionario, se carregado; senao carregado retorna zero */
@@ -291,7 +298,6 @@ int main(int argc, char *argv[]) {
     /* calcula tempo para descarregar o dicionario */
     tempo_limpeza_memoria = calcula_tempo(&tempo_inicial, &tempo_final);
 
-
     /* RESULTADOS ENCONTRADOS */
     printf("\nTOTAL DE PALAVRAS ERRADAS NO TEXTO    : %d\n",   totPalErradas);
     printf("TOTAL DE PALAVRAS DO DICIONARIO         : %d\n",   qtdePalavrasDic);
@@ -304,5 +310,6 @@ int main(int argc, char *argv[]) {
     printf("T E M P O   T O T A L                   : %.2f\n\n",
      tempo_carga + tempo_check + tempo_calc_tamanho_dic + tempo_limpeza_memoria);
     printf("------------------------------------------------------\n");
+
    return SUCESSO;
 } /* fim-main */
