@@ -31,13 +31,13 @@
 
 /* structs */
 typedef struct palavra{
-  char palavra[TAM_MAX];
+  char *palavra;
   struct palavra *prox;
   struct palavra *ant;
 }palavra;
 
 /* Varável global para dicionario */
-palavra dicionario[TAM_DICIO];
+palavra dicionario[TAM_DICIO] = { NULL };
 
 /* Hash para ser usado no dicionário */
 unsigned int JSHash(const char* str, unsigned int length)
@@ -102,9 +102,10 @@ bool carregaDicionario() {
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
-      if(&dicionario[i] != NULL){
+      if(dicionario[i].palavra != NULL){
         p = &dicionario[i];
         novo = (palavra *) malloc (sizeof(palavra));
+        novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
         do{
           p = p->prox;
         }while(p != NULL);
@@ -114,9 +115,10 @@ bool carregaDicionario() {
         p->prox = novo;
       }
       else{
-        strcpy(dicionario[i]->palavra, temp);
-        dicionario[i]->prox = NULL;
-        dicionario[i]->ant = NULL;
+        dicionario[i].palavra = (char *) malloc (sizeof(char)*TAM_MAX);
+        strcpy(dicionario[i].palavra, temp);
+        dicionario[i].prox = NULL;
+        dicionario[i].ant = NULL;
       }
     }
     free(temp);
@@ -157,8 +159,8 @@ bool descarregaDicionario(void) {
   if(fd != NULL){
       while(fgets(temp, TAM_MAX, fd)){
         i = JSHash(temp, strlen(temp));
-        if(dicionario[i] != NULL){
-          p = dicionario[i];
+        if(dicionario[i].palavra != NULL){
+          p = &dicionario[i];
           do{
             ant = p;
             p = p->prox;
