@@ -20,9 +20,6 @@
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
-/* Varável global para dicionario */
-const char *dicionario[TAM_DICIO];
-
 /* retornos desse programa */
 #define SUCESSO                 0
 #define NUM_ARGS_INCORRETO      1
@@ -38,6 +35,9 @@ typedef struct palavra{
   struct palavra *prox;
   struct palavra *ant;
 }palavra;
+
+/* Varável global para dicionario */
+palavra dicionario[TAM_DICIO];
 
 /* Hash para ser usado no dicionário */
 unsigned int JSHash(const char* str, unsigned int length)
@@ -56,42 +56,36 @@ unsigned int JSHash(const char* str, unsigned int length)
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
 bool conferePalavra(const char *palavra) {
-  int i, cont;
+  /*
+  palavra *p;
+  int i;
   char *temp;
 
-  cont = 0;
   temp = (char *) malloc (sizeof(char)*TAM_MAX);
   for(i = 0; i < strlen(palavra); i++){
     temp[i] = palavra[i];
   }
   temp[i] = '\0';
 
+  p = dicionario[i];
   i = JSHash(palavra, TAM_MAX);
   if(dicionario[i] != NULL){
-    if(!strcmp(dicionario[i], temp)){
+    if(!strcmp(dicionario[i]->palavra, temp)){
       free(temp);
       return true;
     }
     else{
-      i++;
-      cont++;
       do{
-        if(i < TAM_DICIO){
-          if(strcmp(dicionario[i], temp)){
-              i++;
-              cont++;
-          }
-          else{
-            return true;
-          }
+        p = p->prox;
+        if(!strcmp(p->palavra, temp)){
+          free(temp);
+          return true;
         }
-        else{
-          i = 0;
-        }
-      }while(cont < MAX_COLIS);
+      }while(p != NULL);
     }
   }
   free(temp);
+  */
   return false;
 } /* fim-conferePalavra */
 
@@ -100,6 +94,7 @@ bool carregaDicionario() {
   int i;
   FILE *fd;
   char *temp;
+  palavra *novo, *p;
 
   fd = fopen(NOME_DICIONARIO, "r");
   if(fd != NULL){
@@ -107,22 +102,21 @@ bool carregaDicionario() {
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
-      if(dicionario[i] != NULL){
-        i++;
+      if(&dicionario[i] != NULL){
+        p = &dicionario[i];
+        novo = (palavra *) malloc (sizeof(palavra));
         do{
-          if(i < TAM_DICIO && dicionario[i] != NULL){
-            i++;
-          }
-          else if(i >= TAM_DICIO){
-            i = 0;
-          }
-          else{
-            dicionario[i] = temp;
-          }
-        }while(dicionario[i] != NULL);
+          p = p->prox;
+        }while(p != NULL);
+        strcpy(novo->palavra, temp);
+        novo->ant = p;
+        novo->prox = NULL;
+        p->prox = novo;
       }
       else{
-        dicionario[i] = temp;
+        strcpy(dicionario[i]->palavra, temp);
+        dicionario[i]->prox = NULL;
+        dicionario[i]->ant = NULL;
       }
     }
     free(temp);
@@ -154,12 +148,27 @@ unsigned int contaPalavrasDic(void) {
 
 /* Descarrega dicionario da memoria. Retorna true se ok e false se algo deu errado */
 bool descarregaDicionario(void) {
-  /*
-    No caso de hash nao e necessario descarregar a memoria pois a variavel dicionario
-  escolhida foi const char *dicionario[TAM_MAX] e nao foi alocada memoria dinamicamente
-  para a mesma.
-  */
-  return true;
+  FILE *fd;
+  int i;
+  char temp[TAM_MAX];
+  palavra *p, *ant;
+
+  fd = fopen(NOME_DICIONARIO, "r");
+  if(fd != NULL){
+      while(fgets(temp, TAM_MAX, fd)){
+        i = JSHash(temp, strlen(temp));
+        if(dicionario[i] != NULL){
+          p = dicionario[i];
+          do{
+            ant = p;
+            p = p->prox;
+            free(ant);
+          }while(p != NULL);
+        }
+      }
+      return true;
+  }
+  return false;
 } /* fim-descarregaDicionario */
 
 /* Retorna o numero de segundos entre a e b */
