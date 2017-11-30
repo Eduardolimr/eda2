@@ -217,7 +217,6 @@ void InOrderz(struct Node *root)
 {
     if(root != NULL){
         InOrderz(root->left);
-          printf("%s ", root->nome);
         InOrderz(root->right);
     }
 }
@@ -349,7 +348,6 @@ int main(int argc, char *argv[]) {
             tempo_check += calcula_tempo(&tempo_inicial, &tempo_final);
             /* imprime palavra se nao encontrada no dicionario */
             if (palavraErrada) {
-                printf("%s\n", palavra);
                 totPalErradas++;
             } /* fim-if */
             /* faz "reset" no indice para recuperar nova palavra no arquivo-texto*/
