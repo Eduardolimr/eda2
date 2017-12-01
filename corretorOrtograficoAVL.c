@@ -18,7 +18,7 @@
 #include <stdbool.h>
 
 /* Tamanho maximo de uma palavra do dicionario */
-#define TAM_MAX 45
+#define TAM_MAX 50
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
 
@@ -75,38 +75,35 @@ struct Node* newNode(char* palavra)
     return(node);
 }
 
-struct Node *rightRotate(struct Node *y)
-{
-    struct Node *x = y->left;
-    struct Node *T2 = x->right;
+struct Node *rightRotate(struct Node *y){
+    struct Node* no;
+    no = y->left;
+    y->left = no->right;
+    no->right = y;
 
-    // Perform rotation
-    x->right = y;
-    y->left = T2;
 
     // Update heights
     y->height = max(height(y->left), height(y->right))+1;
-    x->height = max(height(x->left), height(x->right))+1;
+    no->height = max(height(no->left), height(no->right))+1;
 
     // Return new root
-    return x;
+    return no;
 }
 
-struct Node *leftRotate(struct Node *x)
+struct Node *leftRotate(struct Node *y)
 {
-    struct Node *y = x->right;
-    struct Node *T2 = y->left;
+  struct Node* no;
+  no = y->right;
+  y->right = no->left;
+  no->left = y;
 
-    // Perform rotation
-    y->left = x;
-    x->right = T2;
 
-    //  Update heights
-    x->height = max(height(x->left), height(x->right))+1;
-    y->height = max(height(y->left), height(y->right))+1;
+  // Update heights
+  y->height = max(height(y->left), height(y->right))+1;
+  no->height = max(height(no->left), height(no->right))+1;
 
-    // Return new root
-    return y;
+  // Return new root
+  return no;
 }
 
 int getBalance(struct Node *N)
@@ -232,7 +229,7 @@ int inOrder(struct Node *root){
 
 /* Retorna qtde palavras do dicionario, se carregado; senao carregado retorna zero */
 unsigned int contaPalavrasDic(void) {
-    return inOrder(raiz)-1;
+    return inOrder(raiz);
 } /* fim-contaPalavrasDic */
 
 struct Node *destroiArvore(struct Node *raiz){
