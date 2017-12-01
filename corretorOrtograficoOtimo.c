@@ -12,14 +12,13 @@
 #include <stdbool.h>
 
 /* Tamanho maximo de uma palavra*/
-#define TAM_MAX 45
+#define TAM_MAX 50
 /* Tamanho do vetor dicionario */
-#define TAM_DICIO 1000000
+#define TAM_DICIO 1000003
+/* Máximo de colisões */
+#define MAX_COLIS 100
 /* dicionario default */
 #define NOME_DICIONARIO "dicioPadrao"
-
-/* Varável global para dicionario */
-const char *dicionario[TAM_DICIO];
 
 /* retornos desse programa */
 #define SUCESSO                 0
@@ -32,71 +31,99 @@ const char *dicionario[TAM_DICIO];
 
 /* structs */
 typedef struct palavra{
-  char palavra[TAM_MAX];
+  char *palavra;
   struct palavra *prox;
   struct palavra *ant;
 }palavra;
 
+/* Varável global para dicionario */
+palavra dicionario[TAM_DICIO] = { [0 ... 1000002] = NULL };
+
 /* Hash para ser usado no dicionário */
-unsigned int string_nocase_hash(void *string){
-	unsigned int result = 5381;
-	unsigned char *p;
+unsigned long hash(unsigned char *str)
+   {
+       unsigned long hash = 5381;
+       int c;
 
-	p = (unsigned char *) string;
+       while (c = *str++)
+           hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
-	while (*p != '\0') {
-		result = (result << 5) + result + (unsigned int) (*p);
-		++p;
-	}
+       return hash % TAM_DICIO;
+   }
 
-	return result%1000003;
-}
 
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
-bool conferePalavra(const char *palavra) {
+bool conferePalavra(const char *pal) {
+  palavra *p;
   int i;
-  char temp[TAM_MAX], tempDicio[TAM_MAX];
+  char temp[TAM_MAX];
 
-
-  /* string temporaria para comparacao */
-  strcpy(temp, palavra);
-  i = string_nocase_hash(temp);
-  if(dicionario[i] != NULL){
-    return true;
+  /* char temporario pois *pal é const *char e não é compatível com função de hash */
+  strcpy(temp, pal);
+  i = hash(temp);
+  p = &dicionario[i];
+  if(dicionario[i].palavra != NULL){
+    if(!strcmp(dicionario[i].palavra, pal)){
+      return true;
+    }
+    else{
+      do{
+        p = p->prox;
+        if(p!= NULL && !strcmp(p->palavra, pal)){
+          return true;
+        }
+      }while(p != NULL);
+    }
   }
   return false;
 } /* fim-conferePalavra */
 
+/* Procedimento de inserção caso a posição da hastable já esteja ocupada. */
+void insereNaoNula(palavra *dic, char *temp){
+  palavra *ant, *novo, *p;
+  int cont;
+
+  cont = 0;
+  p = dic;
+  novo = (palavra *) malloc (sizeof(palavra));
+  novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
+  do{
+    ant = p;
+    p = p->prox;
+    ant->prox = p;
+    if(p != NULL){
+      p->ant = ant;
+    }
+  }while(p != NULL);
+  strcpy(novo->palavra, temp);
+  ant->prox = novo;
+  novo->ant = ant;
+} /* fim-insereNaoNula */
+
 /* Carrega dicionario na memoria. Retorna true se sucesso; senao retorna false. */
-bool carregaDicionario() {
+bool carregaDicionario(){
   int i;
   FILE *fd;
   char *temp;
+  palavra *novo, *p;
 
   fd = fopen(NOME_DICIONARIO, "r");
   if(fd != NULL){
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
-      i = string_nocase_hash(temp);
-      if(dicionario[i] != NULL){
-          i++;
-          do{
-            if(i < TAM_DICIO && dicionario[i] == NULL){
-              dicionario[i] = temp;
-            }
-            else if(i >= TAM_DICIO){
-              i = 0;
-            }
-            else{
-              i++;
-            }
-          }while(dicionario[i] != NULL);
+      i = hash(temp);
+      if(dicionario[i].palavra != NULL){
+        p = &dicionario[i];
+        insereNaoNula(p, temp);
       }
-      else{
-        dicionario[i] = temp;
+      else if (dicionario[i].palavra == NULL){
+        dicionario[i].palavra = (char *) malloc (sizeof(char)*TAM_MAX);
+        strcpy(dicionario[i].palavra, temp);
+        dicionario[i].prox = NULL;
+        dicionario[i].ant = NULL;
       }
     }
     free(temp);
@@ -128,12 +155,27 @@ unsigned int contaPalavrasDic(void) {
 
 /* Descarrega dicionario da memoria. Retorna true se ok e false se algo deu errado */
 bool descarregaDicionario(void) {
-  /*
-    No caso de hash nao e necessario descarregar a memoria pois a variavel dicionario
-  escolhida foi const char *dicionario[TAM_MAX] e nao foi alocada memoria dinamicamente
-  para a mesma.
-  */
-  return true;
+  FILE *fd;
+  int i;
+  char temp[TAM_MAX];
+  palavra *p, *ant;
+
+  fd = fopen(NOME_DICIONARIO, "r");
+  if(fd != NULL){
+      while(fgets(temp, TAM_MAX, fd)){
+        i = hash(temp);
+        if(dicionario[i].palavra != NULL){
+          p = &dicionario[i];
+          do{
+            ant = p;
+            p = p->prox;
+            free(ant->palavra);
+          }while(p != NULL);
+        }
+      }
+      return true;
+  }
+  return false;
 } /* fim-descarregaDicionario */
 
 /* Retorna o numero de segundos entre a e b */
@@ -168,7 +210,7 @@ int main(int argc, char *argv[]) {
 
     /* carrega o dicionario na memoria, c/ anotacao de tempos inicial e final */
     getrusage(RUSAGE_SELF, &tempo_inicial);
-       carga = carregaDicionario(dicionario);
+       carga = carregaDicionario();
     getrusage(RUSAGE_SELF, &tempo_final);
 
     /* aborta se o dicionario nao estah carregado */

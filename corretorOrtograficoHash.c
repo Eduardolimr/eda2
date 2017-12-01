@@ -40,14 +40,14 @@ typedef struct palavra{
 palavra dicionario[TAM_DICIO] = { [0 ... 1000002] = NULL };
 
 /* Hash para ser usado no dicionário */
-unsigned int JSHash(const char* str, unsigned int length)
+unsigned int DEKHash(const char* str, unsigned int length)
 {
-   unsigned int hash = 1315423911;
+   unsigned int hash = length;
    unsigned int i    = 0;
 
    for (i = 0; i < length; ++str, ++i)
    {
-      hash ^= ((hash << 5) + (*str) + (hash >> 2));
+      hash = ((hash << 5) ^ (hash >> 27)) ^ (*str);
    }
 
    return hash%TAM_DICIO;
@@ -59,7 +59,7 @@ bool conferePalavra(const char *pal) {
   palavra *p;
   int i;
 
-  i = JSHash(pal, strlen(pal));
+  i = DEKHash(pal, strlen(pal));
   p = &dicionario[i];
   if(dicionario[i].palavra != NULL){
     if(!strcmp(dicionario[i].palavra, pal)){
@@ -111,7 +111,7 @@ bool carregaDicionario(){
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
-      i = JSHash(temp, strlen(temp));
+      i = DEKHash(temp, strlen(temp));
       if(dicionario[i].palavra != NULL){
         p = &dicionario[i];
         insereNaoNula(p, temp);
@@ -160,7 +160,7 @@ bool descarregaDicionario(void) {
   fd = fopen(NOME_DICIONARIO, "r");
   if(fd != NULL){
       while(fgets(temp, TAM_MAX, fd)){
-        i = JSHash(temp, strlen(temp));
+        i = DEKHash(temp, strlen(temp));
         if(dicionario[i].palavra != NULL){
           p = &dicionario[i];
           do{
