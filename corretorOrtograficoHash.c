@@ -68,7 +68,7 @@ bool conferePalavra(const char *palavra) {
   temp[i] = '\0';
 
   p = dicionario[i];
-  i = JSHash(palavra, TAM_MAX);
+  i = JSHash(palavra, strlen(palavra));
   if(dicionario[i] != NULL){
     if(!strcmp(dicionario[i]->palavra, temp)){
       free(temp);
@@ -122,7 +122,7 @@ bool carregaDicionario(){
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
-      i = JSHash(temp, TAM_MAX);
+      i = JSHash(temp, strlen(temp));
       if(dicionario[i].palavra != NULL){
         p = &dicionario[i];
         insereNaoNula(p, temp);
@@ -179,8 +179,6 @@ bool descarregaDicionario(void) {
             ant = p;
             p = p->prox;
             free(ant->palavra);
-            free(ant);
-            p->ant = NULL;
           }while(p != NULL);
         }
       }
