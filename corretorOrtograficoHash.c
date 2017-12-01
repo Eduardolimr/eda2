@@ -94,35 +94,40 @@ bool carregaDicionario() {
   int i;
   FILE *fd;
   char *temp;
-  palavra *novo, *p;
+  palavra *novo, *p, *t;
 
   fd = fopen(NOME_DICIONARIO, "r");
   if(fd != NULL){
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
+    novo = (palavra *) malloc (sizeof(palavra));
+    novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
       if(dicionario[i].palavra != NULL){
-      /*  p = &dicionario[i];
-        novo = (palavra *) malloc (sizeof(palavra));
-        novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
+        /*
+        p = &dicionario[i];
         do{
+          t = p;
           p = p->prox;
+          t->prox = p;
+          p->ant = t;
         }while(p != NULL);
         strcpy(novo->palavra, temp);
-        novo->ant = p;
-        novo->prox = NULL;
-        p->prox = novo;*/
-        printf("bix nood");
+        p = novo;
+        novo->ant = t;
+        */
       }
       else if (dicionario[i].palavra == NULL){
-        printf("ooga booga");
-        /*dicionario[i] = (Node *) malloc (sizeof(Node));
+        dicionario[i].palavra = (char *) malloc (sizeof(char)*TAM_MAX);
         strcpy(dicionario[i].palavra, temp);
         dicionario[i].prox = NULL;
-        dicionario[i].ant = NULL;*/
+        dicionario[i].ant = NULL;
+        printf("%s\n", dicionario[i].palavra);
       }
     }
+    free(novo->palavra);
+    free(novo);
     free(temp);
     fclose(fd);
     return true;
@@ -166,7 +171,7 @@ bool descarregaDicionario(void) {
           do{
             ant = p;
             p = p->prox;
-            free(ant);
+            free(ant->palavra);
           }while(p != NULL);
         }
       }
