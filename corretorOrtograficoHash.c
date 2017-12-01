@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 /* Tamanho maximo de uma palavra*/
-#define TAM_MAX 45
+#define TAM_MAX 50
 /* Tamanho do vetor dicionario */
 #define TAM_DICIO 1000003
 /* Máximo de colisões */
@@ -37,7 +37,7 @@ typedef struct palavra{
 }palavra;
 
 /* Varável global para dicionario */
-palavra dicionario[TAM_DICIO] = { NULL };
+palavra dicionario[TAM_DICIO] = { [0 ... 1000002] =NULL };
 
 /* Hash para ser usado no dicionário */
 unsigned int JSHash(const char* str, unsigned int length)
@@ -103,7 +103,7 @@ bool carregaDicionario() {
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
       if(dicionario[i].palavra != NULL){
-        p = &dicionario[i];
+      /*  p = &dicionario[i];
         novo = (palavra *) malloc (sizeof(palavra));
         novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
         do{
@@ -112,13 +112,15 @@ bool carregaDicionario() {
         strcpy(novo->palavra, temp);
         novo->ant = p;
         novo->prox = NULL;
-        p->prox = novo;
+        p->prox = novo;*/
+        printf("bix nood");
       }
-      else{
-        dicionario[i].palavra = (char *) malloc (sizeof(char)*TAM_MAX);
+      else if (dicionario[i].palavra == NULL){
+        printf("ooga booga");
+        /*dicionario[i] = (Node *) malloc (sizeof(Node));
         strcpy(dicionario[i].palavra, temp);
         dicionario[i].prox = NULL;
-        dicionario[i].ant = NULL;
+        dicionario[i].ant = NULL;*/
       }
     }
     free(temp);
