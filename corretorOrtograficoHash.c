@@ -59,8 +59,8 @@ bool conferePalavra(const char *pal) {
   palavra *p;
   int i;
 
-  p = &dicionario[i];
   i = JSHash(pal, strlen(pal));
+  p = &dicionario[i];
   if(dicionario[i].palavra != NULL){
     if(!strcmp(dicionario[i].palavra, pal)){
       return true;
@@ -74,14 +74,16 @@ bool conferePalavra(const char *pal) {
       }while(p != NULL);
     }
   }
-  printf("ERRADA! %s\n", pal);
   return false;
 } /* fim-conferePalavra */
 
 /* Procedimento de inserção caso a posição da hastable já esteja ocupada. */
-void insereNaoNula(palavra *p, char *temp){
-  palavra *ant, *novo;
+void insereNaoNula(palavra *dic, char *temp){
+  palavra *ant, *novo, *p;
+  int cont;
 
+  cont = 0;
+  p = dic;
   novo = (palavra *) malloc (sizeof(palavra));
   novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
   do{
@@ -93,10 +95,8 @@ void insereNaoNula(palavra *p, char *temp){
     }
   }while(p != NULL);
   strcpy(novo->palavra, temp);
+  ant->prox = novo;
   novo->ant = ant;
-  p = novo;
-  free(novo->palavra);
-  free(novo);
 } /* fim-insereNaoNula */
 
 /* Carrega dicionario na memoria. Retorna true se sucesso; senao retorna false. */
