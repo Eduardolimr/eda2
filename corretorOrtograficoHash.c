@@ -55,37 +55,26 @@ unsigned int JSHash(const char* str, unsigned int length)
 /* Fim-hash */
 
 /* Retorna true se a palavra esta no dicionario. Do contrario, retorna false */
-bool conferePalavra(const char *palavra) {
-  /*
+bool conferePalavra(const char *pal) {
   palavra *p;
   int i;
-  char *temp;
 
-  temp = (char *) malloc (sizeof(char)*TAM_MAX);
-  for(i = 0; i < strlen(palavra); i++){
-    temp[i] = palavra[i];
-  }
-  temp[i] = '\0';
-
-  p = dicionario[i];
-  i = JSHash(palavra, strlen(palavra));
-  if(dicionario[i] != NULL){
-    if(!strcmp(dicionario[i]->palavra, temp)){
-      free(temp);
+  p = &dicionario[i];
+  i = JSHash(pal, strlen(pal));
+  if(dicionario[i].palavra != NULL){
+    if(!strcmp(dicionario[i].palavra, pal)){
       return true;
     }
     else{
       do{
         p = p->prox;
-        if(!strcmp(p->palavra, temp)){
-          free(temp);
+        if(p!= NULL && !strcmp(p->palavra, pal)){
           return true;
         }
       }while(p != NULL);
     }
   }
-  free(temp);
-  */
+  printf("ERRADA! %s\n", pal);
   return false;
 } /* fim-conferePalavra */
 
@@ -132,7 +121,6 @@ bool carregaDicionario(){
         strcpy(dicionario[i].palavra, temp);
         dicionario[i].prox = NULL;
         dicionario[i].ant = NULL;
-        printf("%s\n", dicionario[i].palavra);
       }
     }
     free(temp);
