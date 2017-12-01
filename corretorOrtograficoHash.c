@@ -37,7 +37,7 @@ typedef struct palavra{
 }palavra;
 
 /* Varável global para dicionario */
-palavra dicionario[TAM_DICIO] = { [0 ... 1000002] =NULL };
+palavra dicionario[TAM_DICIO] = { [0 ... 1000002] = NULL };
 
 /* Hash para ser usado no dicionário */
 unsigned int JSHash(const char* str, unsigned int length)
@@ -89,34 +89,43 @@ bool conferePalavra(const char *palavra) {
   return false;
 } /* fim-conferePalavra */
 
+/* Procedimento de inserção caso a posição da hastable já esteja ocupada. */
+void insereNaoNula(palavra *p, char *temp){
+  palavra *ant, *novo;
+
+  novo = (palavra *) malloc (sizeof(palavra));
+  novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
+  do{
+    ant = p;
+    p = p->prox;
+    ant->prox = p;
+    if(p != NULL){
+      p->ant = ant;
+    }
+  }while(p != NULL);
+  strcpy(novo->palavra, temp);
+  novo->ant = ant;
+  p = novo;
+  free(novo->palavra);
+  free(novo);
+} /* fim-insereNaoNula */
+
 /* Carrega dicionario na memoria. Retorna true se sucesso; senao retorna false. */
-bool carregaDicionario() {
+bool carregaDicionario(){
   int i;
   FILE *fd;
   char *temp;
-  palavra *novo, *p, *t;
+  palavra *novo, *p;
 
   fd = fopen(NOME_DICIONARIO, "r");
   if(fd != NULL){
     temp = (char *) malloc (sizeof(char)*TAM_MAX);
-    novo = (palavra *) malloc (sizeof(palavra));
-    novo->palavra = (char *) malloc (sizeof(char)*TAM_MAX);
     while(fgets(temp, TAM_MAX, fd)){
       temp[strlen(temp)-1] = '\0';
       i = JSHash(temp, TAM_MAX);
       if(dicionario[i].palavra != NULL){
-        /*
         p = &dicionario[i];
-        do{
-          t = p;
-          p = p->prox;
-          t->prox = p;
-          p->ant = t;
-        }while(p != NULL);
-        strcpy(novo->palavra, temp);
-        p = novo;
-        novo->ant = t;
-        */
+        insereNaoNula(p, temp);
       }
       else if (dicionario[i].palavra == NULL){
         dicionario[i].palavra = (char *) malloc (sizeof(char)*TAM_MAX);
@@ -126,8 +135,6 @@ bool carregaDicionario() {
         printf("%s\n", dicionario[i].palavra);
       }
     }
-    free(novo->palavra);
-    free(novo);
     free(temp);
     fclose(fd);
     return true;
@@ -172,6 +179,8 @@ bool descarregaDicionario(void) {
             ant = p;
             p = p->prox;
             free(ant->palavra);
+            free(ant);
+            p->ant = NULL;
           }while(p != NULL);
         }
       }
@@ -212,7 +221,7 @@ int main(int argc, char *argv[]) {
 
     /* carrega o dicionario na memoria, c/ anotacao de tempos inicial e final */
     getrusage(RUSAGE_SELF, &tempo_inicial);
-       carga = carregaDicionario(dicionario);
+       carga = carregaDicionario();
     getrusage(RUSAGE_SELF, &tempo_final);
 
     /* aborta se o dicionario nao estah carregado */
